@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from marsbots import config
-from marsbots.resources.language_models import ExafunctionGPTJLanguageModel
+from marsbots_core import config
+from marsbots_core.resources.language_models import ExafunctionGPTJLanguageModel
 
 
 class HelperCog(commands.Cog):
@@ -10,6 +10,7 @@ class HelperCog(commands.Cog):
 
     @commands.command()
     async def whereami(self, ctx: commands.context) -> None:
+        await ctx.send("Hello from a custom cog")
         await ctx.send(ctx.guild.id)
 
     @commands.command()

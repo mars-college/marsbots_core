@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from marsbots import constants
+from marsbots_core import constants
 
 load_dotenv(constants.DOTENV_PATH)
 
