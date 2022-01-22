@@ -40,7 +40,7 @@ def start(specfile_path: str, cog_path: str) -> None:
     bot = MarsBot(specfile_path)
     print(cog_path)
     if cog_path:
-        bot.load_extension("marsbots." + cog_path)
+        bot.load_extension(cog_path)
     else:
         bot.load_extension("maincog")
     bot.run(os.getenv(bot.settings.token_env))
