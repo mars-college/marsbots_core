@@ -5,8 +5,10 @@ import discord
 from discord.ext import commands
 
 from marsbots_core import config
+from marsbots_core.models import ChatMessage
 from marsbots_core.programs.ifttt import ifttt_get
 from marsbots_core.programs.ifttt import ifttt_post
+from marsbots_core.resources.discord_utils import get_discord_messages
 from marsbots_core.resources.discord_utils import is_mentioned
 from marsbots_core.resources.language_models import OpenAIGPT3LanguageModel
 from marsbots_core.resources.modifiers import with_probabilities
@@ -21,6 +23,16 @@ class HelperCog(commands.Cog):
     async def whereami(self, ctx: commands.context) -> None:
         await ctx.send("Hello from a custom cog")
         await ctx.send(ctx.guild.id)
+
+    @commands.command()
+    async def get_messages(self, ctx: commands.Context) -> None:
+        messages = await get_discord_messages(ctx.channel, 10)
+        for message in messages:
+            msg = ChatMessage(
+                content=message.content,
+                sender=message.author.name,
+            )
+            print(msg)
 
     @commands.command()
     async def maybe_hello(self, ctx: commands.context) -> None:
@@ -61,7 +73,7 @@ class HelperCog(commands.Cog):
         if is_mentioned(message, self.bot.user):
             await message.channel.send("Hello from a custom cog, you were mentioned.")
 
-        autoreply = self.should_autoreply(message, 0.5)
+        autoreply = self.should_autoreply(message, 0.0)
         if autoreply:
             async with message.channel.typing():
                 func, args = autoreply
