@@ -14,8 +14,8 @@ flit install --pth-file
 
 ### Simple bot (from json)
 
-`python marsbots_core/bot.py path/to/json-spec`
+`python bot.py path/to/json-spec`
 
 ### Custom bot
 
-`python ./marsbots/bot.py path/to/json-spec --cog-path='path.to.cog'`
+`python bot.py path/to/json-spec --cog-path='path.to.cog'`
