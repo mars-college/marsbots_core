@@ -1,6 +1,7 @@
 from discord.ext import commands
 
-from marsbots_core.programs import hey
+from marsbots_core.programs.ifttt import ifttt_get
+from marsbots_core.programs.ifttt import ifttt_post
 
 
 class HelperCog(commands.Cog):
@@ -13,8 +14,14 @@ class HelperCog(commands.Cog):
         await ctx.send(ctx.guild.id)
 
     @commands.command()
-    async def hey(self, ctx: commands.context) -> None:
-        await ctx.send(hey())
+    async def test_ifttt(self, ctx: commands.context) -> None:
+        await ctx.send("testing ifttt")
+        ifttt_get("test")
+
+    @commands.command()
+    async def test_ifttt_post(self, ctx: commands.context) -> None:
+        await ctx.send("testing ifttt post")
+        ifttt_post("test_post", {"value1": "hey"})
 
 
 def setup(bot: commands.Bot) -> None:

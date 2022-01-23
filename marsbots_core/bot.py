@@ -38,7 +38,6 @@ class MarsBot(commands.Bot):
 def start(specfile_path: str, cog_path: str) -> None:
     print("Launching bot...")
     bot = MarsBot(specfile_path)
-    print(cog_path)
     if cog_path:
         bot.load_extension(cog_path)
     else:
