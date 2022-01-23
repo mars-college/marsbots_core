@@ -1,14 +1,5 @@
 {
   "name": "Test Bot",
   "token_env": "DISCORD_TOKEN_TEST",
-  "command_prefix": "!",
-  "programs": [
-    {
-      "name": "ifttt_test",
-      "function": "ifttt_get",
-      "args": {
-        "event_name": "test"
-      }
-    }
-  ]
+  "command_prefix": "!"
 }

@@ -1,8 +1,10 @@
+import discord
 from discord.ext import commands
 
 from marsbots_core.programs.ifttt import ifttt_get
 from marsbots_core.programs.ifttt import ifttt_post
 from marsbots_core.resources import modifiers
+from marsbots_core.resources.discord_utils import is_mentioned
 
 
 class HelperCog(commands.Cog):
@@ -35,8 +37,14 @@ class HelperCog(commands.Cog):
         await ctx.send("testing ifttt post")
         ifttt_post("test_post", {"value1": "hey"})
 
+    @commands.Cog.listener("on_message")
+    async def on_message(self, message: discord.Message) -> None:
+        print(message.mentions)
+        if is_mentioned(message, self.bot.user):
+            await message.channel.send("Hello from a custom cog, you were mentioned.")
+
     def get_with_prob_message(self, name):
-        return f"Hello from {name}, with probability 0.8"
+        return f"Hello from {name}"
 
 
 def setup(bot: commands.Bot) -> None:
