@@ -1,6 +1,3 @@
-import asyncio
-from functools import partial
-
 import discord
 from discord.ext import commands
 
@@ -8,6 +5,7 @@ from marsbots_core import config
 from marsbots_core.models import ChatMessage
 from marsbots_core.programs.ifttt import ifttt_get
 from marsbots_core.programs.ifttt import ifttt_post
+from marsbots_core.programs.lm import complete_text
 from marsbots_core.resources.discord_utils import get_discord_messages
 from marsbots_core.resources.discord_utils import is_mentioned
 from marsbots_core.resources.language_models import OpenAIGPT3LanguageModel
@@ -65,7 +63,7 @@ class HelperCog(commands.Cog):
     ) -> None:
         prompt = " ".join(input_text)
         async with ctx.channel.typing():
-            completion = self.complete_text(prompt, max_tokens)
+            completion = complete_text(self.language_model, prompt, max_tokens)
             await ctx.send(prompt + completion)
 
     @commands.Cog.listener("on_message")
@@ -98,19 +96,6 @@ class HelperCog(commands.Cog):
             ),
         )
         return reply
-
-    async def complete_text(self, prompt, max_tokens):
-        loop = asyncio.get_running_loop()
-        max_tokens = int(max_tokens)
-        completion_text = await loop.run_in_executor(
-            None,
-            partial(
-                self.language_model.completion_handler,
-                prompt=prompt,
-                max_tokens=max_tokens,
-            ),
-        )
-        return completion_text
 
 
 def setup(bot: commands.Bot) -> None:
