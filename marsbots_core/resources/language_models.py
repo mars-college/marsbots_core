@@ -6,6 +6,8 @@ import cohere
 import openai
 import requests
 
+from marsbots_core import config
+
 
 class LanguageModel(ABC):
     def __init__(self, model_name: str, settings: dict) -> None:
@@ -24,6 +26,7 @@ class OpenAIGPT3LanguageModel(LanguageModel):
             "frequency_penalty": 0.0,
             "presence_penalty": 0.5,
         }
+        openai.api_key = config.LM_OPENAI_API_KEY
         super().__init__(model_name, settings)
 
     def completion_handler(
@@ -129,11 +132,11 @@ class CohereLanguageModel(LanguageModel):
             "max_tokens": 50,
         }
         self.api_key = api_key
+        self.client = cohere.Client(self.api_key)
         super().__init__(model_name, settings)
 
     def completion_handler(self, prompt: str, max_tokens: int, **kwargs: any) -> str:
-        co = cohere.Client(self.api_key)
-        prediction = co.generate(
+        prediction = self.client.generate(
             model=self.settings["model_type"],
             prompt=prompt,
             max_tokens=max_tokens,

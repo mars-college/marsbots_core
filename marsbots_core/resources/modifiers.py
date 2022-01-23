@@ -18,7 +18,4 @@ def with_probabilities(
         choices = choices + (None,)
         probs = probs + (1 - total_prob,)
     res = random.choices(choices, weights=probs)[0]
-    if res:
-        func, args = res
-        return func(*args)
-    return None
+    return res
