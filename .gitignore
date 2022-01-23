@@ -240,6 +240,10 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# Program
+
+marsbots/
+
 # User
 secrets/
 dev/
