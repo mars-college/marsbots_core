@@ -23,14 +23,15 @@ async def process_mention_as_command(
     cog: commands.Cog,
     command_not_found_response: str = constants.COMMAND_NOT_FOUND_MESSAGE,
 ):
-    if is_mentioned(ctx.message, cog.bot.user):
-        try:
-            message_text = ctx.message.content.split(" ")[1]
-            cmd = getattr(cog, message_text)
-            await cmd(ctx)
-        except Exception as e:
-            logging.error(e)
-            await ctx.message.channel.send(command_not_found_response)
+    try:
+        split_message = ctx.message.content.split(" ")
+        message_text, args = split_message[1], split_message[2:]
+        print(args)
+        cmd = getattr(cog, message_text)
+        await cmd(ctx, *args)
+    except Exception as e:
+        logging.error(e)
+        await ctx.message.channel.send(command_not_found_response)
 
 
 async def get_discord_messages(

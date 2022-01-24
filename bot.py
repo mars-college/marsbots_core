@@ -27,19 +27,18 @@ class MarsBot(commands.Bot):
         return MarsBotSettings(**settings)
 
     def configure_logging(self) -> None:
+        print("Configuring logging...")
         logdir = constants.LOG_DIR / self.settings.name
         logfile = str(logdir / "discord.log")
         logdir.mkdir(parents=True, exist_ok=True)
 
-        logger = logging.getLogger(self.settings.name)
-        logger.setLevel(logging.DEBUG)
-
         logging.basicConfig(
-            level=logging.DEBUG,
+            level=logging.INFO,
             format="%(asctime)s %(levelname)-8s %(message)s",
             datefmt="%a, %d %b %Y %H:%M:%S",
             filename=logfile,
             filemode="w",
+            force=True,
         )
 
     async def on_ready(self) -> None:
