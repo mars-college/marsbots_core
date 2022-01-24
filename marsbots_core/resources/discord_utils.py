@@ -2,6 +2,10 @@ from datetime import datetime
 from typing import Optional
 
 import discord
+from charset_normalizer import logging
+from discord.ext import commands
+
+from marsbots_core import constants
 
 
 def is_mentioned(message: discord.Message, user: discord.User) -> bool:
@@ -12,6 +16,21 @@ def is_mentioned(message: discord.Message, user: discord.User) -> bool:
     :return: True if the user is mentioned, False otherwise.
     """
     return user.id in [m.id for m in message.mentions]
+
+
+async def process_mention_as_command(
+    ctx: str,
+    cog: commands.Cog,
+    command_not_found_response: str = constants.COMMAND_NOT_FOUND_MESSAGE,
+):
+    if is_mentioned(ctx.message, cog.bot.user):
+        try:
+            message_text = ctx.message.content.split(" ")[1]
+            cmd = getattr(cog, message_text)
+            await cmd(ctx)
+        except Exception as e:
+            logging.error(e)
+            await ctx.message.channel.send(command_not_found_response)
 
 
 async def get_discord_messages(
