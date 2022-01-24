@@ -26,7 +26,6 @@ async def process_mention_as_command(
     try:
         split_message = ctx.message.content.split(" ")
         message_text, args = split_message[1], split_message[2:]
-        print(args)
         cmd = getattr(cog, message_text)
         await cmd(ctx, *args)
     except Exception as e:

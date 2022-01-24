@@ -27,7 +27,6 @@ class MarsBot(commands.Bot):
         return MarsBotSettings(**settings)
 
     def configure_logging(self) -> None:
-        print("Configuring logging...")
         logdir = constants.LOG_DIR / self.settings.name
         logfile = str(logdir / "discord.log")
         logdir.mkdir(parents=True, exist_ok=True)
