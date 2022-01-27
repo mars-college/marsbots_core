@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from typing import Optional
 
@@ -56,3 +57,12 @@ async def get_discord_messages(
     raw_messages.reverse()
 
     return raw_messages
+
+
+def remove_mentions(message_text: str) -> str:
+    """
+    Removes all mentions from a message.
+    :param message: The message to remove mentions from.
+    :return: The message with all mentions removed.
+    """
+    return re.sub(r"<@!\d+>", "", message_text)
