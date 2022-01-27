@@ -5,3 +5,5 @@ DOTENV_PATH = ROOT_DIR / ".env"
 LOG_DIR = ROOT_DIR / "logs"
 
 COMMAND_NOT_FOUND_MESSAGE = "Command not found."
+
+UNLIKELY_PREFIX = "fhkjdjksfjkdhkjfhksdjfsdjkfbwereuifbiudbyuifvyudsvyu"
