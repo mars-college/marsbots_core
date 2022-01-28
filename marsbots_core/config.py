@@ -9,3 +9,5 @@ LM_AI21_API_KEY = os.getenv("LM_AI21_API_KEY")
 LM_COHERE_API_KEY = os.getenv("LM_COHERE_API_KEY")
 
 IFTTT_KEY = os.getenv("IFTTT_KEY")
+
+CRASH_WEBHOOK_URL = os.getenv("CRASH_WEBHOOK_URL")

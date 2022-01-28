@@ -1,9 +1,12 @@
 import argparse
+import atexit
 import json
 import logging
 import os
 
 import discord
+from discord import RequestsWebhookAdapter
+from discord import Webhook
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -21,6 +24,7 @@ class MarsBot(commands.Bot):
             command_prefix=self.settings.command_prefix,
             intents=intents,
         )
+        atexit.register(self.post_exit_webhook)
 
     def load_settings(self, specfile_path: str) -> MarsBotSettings:
         settings = json.load(open(specfile_path))
@@ -52,6 +56,19 @@ class MarsBot(commands.Bot):
             return
 
         await self.process_commands(message)
+
+    def post_exit_webhook(self):
+        webhook_url = os.getenv("CRASH_WEBHOOK_URL")
+        if webhook_url:
+            try:
+                webhook = Webhook.from_url(
+                    webhook_url,
+                    adapter=RequestsWebhookAdapter(),
+                )
+                webhook.send(f"{self.settings.name} is down.")
+            except Exception as e:
+                logging.error("Unable to post exit to webhook.")
+                logging.error(str(e))
 
 
 def start(

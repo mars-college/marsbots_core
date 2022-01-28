@@ -18,4 +18,4 @@ flit install --pth-file
 
 ### Custom bot
 
-`python bot.py path/to/json-spec --cog-path='path.to.cog'`
+`python bot.py path/to/json-spec --cog-path=path.to.cog --dotenv-file=path/to/.env`
