@@ -5,8 +5,7 @@ import logging
 import os
 
 import discord
-from discord import RequestsWebhookAdapter
-from discord import Webhook
+from discord import SyncWebhook
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -61,10 +60,7 @@ class MarsBot(commands.Bot):
         webhook_url = os.getenv("CRASH_WEBHOOK_URL")
         if webhook_url:
             try:
-                webhook = Webhook.from_url(
-                    webhook_url,
-                    adapter=RequestsWebhookAdapter(),
-                )
+                webhook = SyncWebhook.from_url(webhook_url)
                 webhook.send(f"{self.settings.name} is down.")
             except Exception as e:
                 logging.error("Unable to post exit to webhook.")

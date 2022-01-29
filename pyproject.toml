@@ -10,10 +10,9 @@ dynamic = ["version", "description"]
 dependencies = [
   "requests",
   "openai",
-  "cogwatch",
   "python-dotenv",
-  "discord.py",
-  "cohere"
+  "cohere",
+  "py-cord==2.0.0b1"
 ]
 
 [project.optional-dependencies]

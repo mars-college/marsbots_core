@@ -11,3 +11,4 @@ LM_COHERE_API_KEY = os.getenv("LM_COHERE_API_KEY")
 IFTTT_KEY = os.getenv("IFTTT_KEY")
 
 CRASH_WEBHOOK_URL = os.getenv("CRASH_WEBHOOK_URL")
+TEST_GUILD_ID = int(os.getenv("TEST_GUILD_ID")) if os.getenv("TEST_GUILD_ID") else None
