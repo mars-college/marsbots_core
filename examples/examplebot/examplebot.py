@@ -8,9 +8,8 @@ from marsbots_core.programs.ifttt import ifttt_get
 from marsbots_core.programs.ifttt import ifttt_post
 from marsbots_core.programs.lm import complete_text
 from marsbots_core.resources.discord_utils import get_discord_messages
-from marsbots_core.resources.discord_utils import is_mentioned
+from marsbots_core.resources.discord_utils import get_reply_chain
 from marsbots_core.resources.language_models import OpenAIGPT3LanguageModel
-from marsbots_core.resources.modifiers import with_probabilities
 
 
 class ButtonView(discord.ui.View):
@@ -59,18 +58,6 @@ class ExampleCog(commands.Cog):
             print(msg)
 
     @commands.command()
-    async def maybe_hello(self, ctx: commands.context) -> None:
-        msg = with_probabilities(
-            ((self.get_with_prob_message, ("jmill",)), 0.4),
-            ((self.get_with_prob_message, ("JMILL",)), 0.4),
-        )
-        if msg:
-            func, args = msg
-            await ctx.send(func(*args))
-        else:
-            await ctx.send("Hello from a custom cog, you lowrolled.")
-
-    @commands.command()
     async def test_ifttt(self, ctx: commands.context) -> None:
         await ctx.send("testing ifttt")
         ifttt_get("test")
@@ -112,36 +99,17 @@ class ExampleCog(commands.Cog):
         navigator = ButtonView()
         await ctx.respond("press the button.", view=navigator)
 
+    @commands.command()
+    async def resolve(self, ctx, message_id):
+        msg = await ctx.fetch_message(message_id)
+        print(msg.content)
+
     @commands.Cog.listener("on_message")
     async def on_message(self, message: discord.Message) -> None:
-        if is_mentioned(message, self.bot.user):
-            await message.channel.send("Hello from a custom cog, you were mentioned.")
-
-        autoreply = self.should_autoreply(message, 0.0)
-        if autoreply:
-            async with message.channel.typing():
-                func, args = autoreply
-                completion = await func(*args)
-                prompt = args[0]
-                await message.channel.send(prompt + completion)
-
-    def get_with_prob_message(self, name):
-        return f"Hello from {name}"
-
-    def should_autoreply(self, message: discord.Message, probability: float) -> None:
-        reply = with_probabilities(
-            (
-                (
-                    self.complete,
-                    (
-                        "Hey dude what's up I'm going to",
-                        40,
-                    ),
-                ),
-                probability,
-            ),
-        )
-        return reply
+        ctx = await self.bot.get_context(message)
+        reply_chain = await get_reply_chain(ctx, message, depth=5)
+        print(f"{len(reply_chain)} messages found")
+        print(reply_chain)
 
 
 def setup(bot: commands.Bot) -> None:

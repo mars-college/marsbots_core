@@ -1,9 +1,9 @@
+import logging
 import re
 from datetime import datetime
 from typing import Optional
 
 import discord
-from charset_normalizer import logging
 from discord.ext import commands
 
 from marsbots_core import constants
@@ -66,3 +66,18 @@ def remove_mentions(message_text: str) -> str:
     :return: The message with all mentions removed.
     """
     return re.sub(r"<@!\d+>", "", message_text)
+
+
+async def get_reply_chain(
+    ctx,
+    message: discord.Message,
+    depth: int,
+) -> list[discord.Message]:
+    messages = []
+    count = 0
+    while message and message.reference and count < depth:
+        message = await ctx.fetch_message(message.reference.message_id)
+        messages.append(message)
+        count += 1
+    messages.reverse()
+    return messages
