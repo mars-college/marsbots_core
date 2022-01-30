@@ -1,5 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
+from dataclasses import dataclass
 from typing import Any
 
 import cohere
@@ -10,88 +11,79 @@ from marsbots_core import config
 
 
 class LanguageModel(ABC):
-    def __init__(self, model_name: str, settings: dict) -> None:
+    def __init__(self, model_name: str) -> None:
         self.model_name = model_name
-        self.settings = settings
 
     @abstractmethod
     def completion_handler(self, prompt: str, **kwargs: Any) -> str:
         raise NotImplementedError
 
 
+@dataclass
+class OpenAIGPT3LanguageModelSettings:
+    engine: str = "davinci"
+    temperature: float = 1.0
+    top_p: float = 1.0
+    frequency_penalty: float = 0.0
+    presence_penalty: float = 0.0
+
+
 class OpenAIGPT3LanguageModel(LanguageModel):
-    def __init__(self, model_name: str = "openai-gpt3") -> None:
-        settings = {
-            "temperature": 1.0,
-            "frequency_penalty": 0.0,
-            "presence_penalty": 0.5,
-        }
-        openai.api_key = config.LM_OPENAI_API_KEY
-        super().__init__(model_name, settings)
+    def __init__(
+        self,
+        model_name: str = "openai-gpt3",
+        api_key: str = config.LM_OPENAI_API_KEY,
+        **kwargs,
+    ) -> None:
+        self.settings = OpenAIGPT3LanguageModelSettings(**kwargs)
+        openai.api_key = api_key
+        super().__init__(model_name)
 
     def completion_handler(
         self,
         prompt: str,
         max_tokens: int,
         stop: list = None,
+        **kwargs: any,
     ) -> str:
+        print(kwargs)
         completion = openai.Completion.create(
-            engine="davinci",
+            engine=self.settings.engine,
             prompt=prompt,
             max_tokens=max_tokens,
-            frequency_penalty=self.settings["frequency_penalty"],
-            temperature=self.settings["temperature"],
-            presence_penalty=self.settings["presence_penalty"],
             stop=stop,
+            temperature=kwargs.get("temperature") or self.settings.temperature,
+            top_p=kwargs.get("top_p") or self.settings.top_p,
+            frequency_penalty=kwargs.get("frequency_penalty")
+            or self.settings.frequency_penalty,
+            presence_penalty=kwargs.get("presence_penalty")
+            or self.settings.presence_penalty,
         )
         completion_text = completion.choices[0].text
         return completion_text
 
 
-class ExafunctionGPTJLanguageModel(LanguageModel):
-    def __init__(self, api_key: str, model_name: str = "exafunction-gptj") -> None:
-        settings = {"temperature": 1.0, "min_tokens": 0}
-        self.api_url = "https://nlp-server.exafunction.com/text_completion"
-        self.api_key = api_key
-        super().__init__(model_name, settings)
-
-    def completion_handler(self, prompt: str, max_tokens: int, **kwargs: any) -> str:
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-        payload = {
-            "prompt": prompt,
-            "max_length": max_tokens,
-            "min_length": self.settings["min_tokens"],
-            "temperature": self.settings["temperature"],
-            "remove_input": "true",
-        }
-        response = requests.post(self.api_url, json=payload, headers=headers)
-        completion = response.json()
-        completion_text = completion["text"]
-        return completion_text
+@dataclass
+class AI21JurassicLanguageModelSettings:
+    model_type: str = "j1-jumbo"
+    temperature: float = 1.0
+    top_p: float = 1.0
 
 
 class AI21JurassicLanguageModel(LanguageModel):
     def __init__(
         self,
-        api_key: str,
-        model_type: str = "j1-jumbo",
         model_name: str = "ai21-jurassic",
+        api_key: str = config.LM_AI21_API_KEY,
+        **kwargs,
     ) -> None:
-        settings = {
-            "model_type": model_type,
-            "temperature": 1.0,
-            "top_p": 1.0,
-            "max_tokens": 16,
-        }
+        self.settings = AI21JurassicLanguageModelSettings(**kwargs)
         self.api_key = api_key
-        super().__init__(model_name, settings)
+        super().__init__(model_name)
 
     @property
     def api_url(self) -> str:
-        return f"https://api.ai21.com/studio/v1/{self.settings['model_type']}/complete"
+        return f"https://api.ai21.com/studio/v1/{self.settings.model_type}/complete"
 
     def completion_handler(
         self,
@@ -107,8 +99,8 @@ class AI21JurassicLanguageModel(LanguageModel):
         payload = {
             "prompt": prompt,
             "maxTokens": max_tokens,
-            "temperature": self.settings["temperature"],
-            "topP": self.settings["top_p"],
+            "temperature": kwargs.get("temperature") or self.settings.temperature,
+            "topP": kwargs.get("top_p") or self.settings.top_p,
             "stopSequences": stop if stop else [],
         }
         response = requests.post(self.api_url, json=payload, headers=headers)
@@ -117,32 +109,33 @@ class AI21JurassicLanguageModel(LanguageModel):
         return completion_text
 
 
+@dataclass
+class CohereLanguageModelSettings:
+    model_type: str = "large"
+    temperature: float = 1.0
+    top_p: float = 1.0
+    top_k: float = 0
+
+
 class CohereLanguageModel(LanguageModel):
     def __init__(
         self,
-        api_key: str,
-        model_type: str = "large",
         model_name: str = "cohere",
+        api_key: str = config.LM_COHERE_API_KEY,
+        **kwargs,
     ):
-        settings = {
-            "model_type": model_type,
-            "temperature": 1.0,
-            "top_k": 0,
-            "top_p": 1.0,
-            "max_tokens": 50,
-        }
-        self.api_key = api_key
-        self.client = cohere.Client(self.api_key)
-        super().__init__(model_name, settings)
+        self.client = cohere.Client(api_key)
+        self.settings = CohereLanguageModelSettings(**kwargs)
+        super().__init__(model_name)
 
     def completion_handler(self, prompt: str, max_tokens: int, **kwargs: any) -> str:
         prediction = self.client.generate(
-            model=self.settings["model_type"],
             prompt=prompt,
             max_tokens=max_tokens,
-            temperature=self.settings["temperature"],
-            k=self.settings["top_k"],
-            p=self.settings["top_p"],
+            model=kwargs.get("model_type") or self.settings.model_type,
+            temperature=kwargs.get("temperature") or self.settings.model_type,
+            k=kwargs.get("top_k") or self.settings.top_k,
+            p=kwargs.get("top_p") or self.settings.top_p,
         )
         completion = prediction.generations[0].text
         return completion
