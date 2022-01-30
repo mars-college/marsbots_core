@@ -81,3 +81,12 @@ async def get_reply_chain(
         count += 1
     messages.reverse()
     return messages
+
+
+def in_channels(channel_ids: list[int]) -> commands.check:
+    async def predicate(ctx):
+        if ctx.channel.id in channel_ids:
+            return True
+        print("command not valid in channel")
+
+    return commands.check(predicate)

@@ -8,7 +8,7 @@ from marsbots_core.programs.ifttt import ifttt_get
 from marsbots_core.programs.ifttt import ifttt_post
 from marsbots_core.programs.lm import complete_text
 from marsbots_core.resources.discord_utils import get_discord_messages
-from marsbots_core.resources.discord_utils import get_reply_chain
+from marsbots_core.resources.discord_utils import in_channels
 from marsbots_core.resources.language_models import OpenAIGPT3LanguageModel
 
 
@@ -104,12 +104,10 @@ class ExampleCog(commands.Cog):
         msg = await ctx.fetch_message(message_id)
         print(msg.content)
 
-    @commands.Cog.listener("on_message")
-    async def on_message(self, message: discord.Message) -> None:
-        ctx = await self.bot.get_context(message)
-        reply_chain = await get_reply_chain(ctx, message, depth=5)
-        print(f"{len(reply_chain)} messages found")
-        print(reply_chain)
+    @commands.command()
+    @in_channels([config.TEST_CHANNEL_ID])
+    async def test_in_channels(self, ctx):
+        await ctx.send("In the test channel.")
 
 
 def setup(bot: commands.Bot) -> None:
