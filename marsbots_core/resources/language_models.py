@@ -4,10 +4,12 @@ from dataclasses import dataclass
 from typing import Any
 
 import cohere
+import numpy as np
 import openai
 import requests
 
 from marsbots_core import config
+from marsbots_core.util import cosine_similarity
 
 
 class LanguageModel(ABC):
@@ -46,7 +48,6 @@ class OpenAIGPT3LanguageModel(LanguageModel):
         stop: list = None,
         **kwargs: any,
     ) -> str:
-        print(kwargs)
         completion = openai.Completion.create(
             engine=self.settings.engine,
             prompt=prompt,
@@ -61,6 +62,30 @@ class OpenAIGPT3LanguageModel(LanguageModel):
         )
         completion_text = completion.choices[0].text
         return completion_text
+
+    def document_search(self, documents: list[str], query: str, **kwargs):
+        engine = kwargs.get("engine") or self.settings.engine
+        search = openai.Engine(engine).search(documents=documents, query=query)
+        return search
+
+    def document_similarity(self, document: str, query: str, **kwargs):
+        engine = kwargs.get("engine") or self.settings.engine
+        doc_engine = f"text-search-{engine}-doc-001"
+        query_engine = f"text-search-{engine}-query-001"
+        document_embedding = self._get_embedding(document, engine=doc_engine)
+        query_embedding = self._get_embedding(query, engine=query_engine)
+        similarity = cosine_similarity(document_embedding, query_embedding)
+        return similarity
+
+    def most_similar_doc_idx(self, document_search_result: dict):
+        return np.argmax([d["score"] for d in document_search_result["data"]])
+
+    def _get_embedding(self, text: str, engine: str):
+        text = text.replace("\n", " ")
+
+        return openai.Embedding.create(input=[text], engine=engine)["data"][0][
+            "embedding"
+        ]
 
 
 @dataclass
@@ -139,3 +164,47 @@ class CohereLanguageModel(LanguageModel):
         )
         completion = prediction.generations[0].text
         return completion
+
+
+@dataclass
+class GooseAILanguageModelSettings:
+    engine: str = "gpt-neo-20b"
+    temperature: float = 1.0
+    top_p: float = 1.0
+    frequency_penalty: float = 0.0
+    presence_penalty: float = 0.0
+
+
+class GooseAILanguageModel(LanguageModel):
+    def __init__(
+        self,
+        model_name: str = "gooseai",
+        api_key: str = config.LM_GOOSEAI_API_KEY,
+        **kwargs,
+    ) -> None:
+        self.settings = GooseAILanguageModelSettings(**kwargs)
+        openai.api_key = api_key
+        openai.api_base = "https://api.goose.ai/v1"
+        super().__init__(model_name)
+
+    def completion_handler(
+        self,
+        prompt: str,
+        max_tokens: int,
+        stop: list = None,
+        **kwargs: any,
+    ) -> str:
+        completion = openai.Completion.create(
+            engine=self.settings.engine,
+            prompt=prompt,
+            max_tokens=max_tokens,
+            stop=stop,
+            temperature=kwargs.get("temperature") or self.settings.temperature,
+            top_p=kwargs.get("top_p") or self.settings.top_p,
+            frequency_penalty=kwargs.get("frequency_penalty")
+            or self.settings.frequency_penalty,
+            presence_penalty=kwargs.get("presence_penalty")
+            or self.settings.presence_penalty,
+        )
+        completion_text = completion.choices[0].text
+        return completion_text

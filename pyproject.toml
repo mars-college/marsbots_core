@@ -12,7 +12,8 @@ dependencies = [
   "openai",
   "python-dotenv",
   "cohere",
-  "py-cord==2.0.0b1"
+  "py-cord==2.0.0b1",
+  "notion"
 ]
 
 [project.optional-dependencies]
@@ -25,6 +26,7 @@ no_implicit_optional = true
 
 [tool.black]
 line-length = 88
+experimental-string-processing = true
 include = '\.pyi?$'
 exclude = '''
 /(

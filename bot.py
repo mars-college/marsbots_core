@@ -78,10 +78,7 @@ def start(
     load_dotenv(dotenv_path)
 
     bot = MarsBot(specfile_path)
-    if cog_path:
-        bot.load_extension(cog_path)
-    else:
-        bot.load_extension("maincog")
+    bot.load_extension(cog_path)
     bot.run(os.getenv(bot.settings.token_env))
 
 
