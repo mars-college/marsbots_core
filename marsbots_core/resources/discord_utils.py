@@ -59,9 +59,9 @@ async def get_discord_messages(
     return raw_messages
 
 
-def remove_bot_mention(
+def replace_bot_mention(
     message_text: str,
-    only_first: True,
+    only_first: bool = True,
     replacement_str: str = "",
 ) -> str:
     """
