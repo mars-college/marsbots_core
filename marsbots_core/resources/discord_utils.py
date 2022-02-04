@@ -59,16 +59,20 @@ async def get_discord_messages(
     return raw_messages
 
 
-def remove_mentions(message_text: str, only_first: bool = False) -> str:
+def remove_bot_mention(
+    message_text: str,
+    only_first: True,
+    replacement_str: str = "",
+) -> str:
     """
     Removes all mentions from a message.
     :param message: The message to remove mentions from.
     :return: The message with all mentions removed.
     """
     if only_first:
-        return re.sub(r"<@!\d+>", "", message_text, 1)
+        return re.sub(r"<@!\d+>", replacement_str, message_text, 1)
     else:
-        return re.sub(r"<@!\d+>", "", message_text)
+        return re.sub(r"<@!\d+>", replacement_str, message_text)
 
 
 async def get_reply_chain(
@@ -84,6 +88,17 @@ async def get_reply_chain(
         count += 1
     messages.reverse()
     return messages
+
+
+def replace_mentions_with_usernames(message_content: str, mentions) -> str:
+    """
+    Replaces all mentions with their usernames.
+    :param message_content: The message to replace mentions in.
+    :return: The message with all mentions replaced with their usernames.
+    """
+    for mention in mentions:
+        message_content = message_content.replace(f"<@!{mention.id}>", mention.name)
+    return message_content
 
 
 def in_channels(channel_ids: list[int]) -> commands.check:
