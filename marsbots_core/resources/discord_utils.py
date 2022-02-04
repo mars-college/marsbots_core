@@ -59,13 +59,16 @@ async def get_discord_messages(
     return raw_messages
 
 
-def remove_mentions(message_text: str) -> str:
+def remove_mentions(message_text: str, only_first: bool = False) -> str:
     """
     Removes all mentions from a message.
     :param message: The message to remove mentions from.
     :return: The message with all mentions removed.
     """
-    return re.sub(r"<@!\d+>", "", message_text)
+    if only_first:
+        return re.sub(r"<@!\d+>", "", message_text, 1)
+    else:
+        return re.sub(r"<@!\d+>", "", message_text)
 
 
 async def get_reply_chain(
