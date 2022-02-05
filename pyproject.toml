@@ -10,10 +10,9 @@ dynamic = ["version", "description"]
 dependencies = [
   "requests",
   "openai",
-  "cogwatch",
   "python-dotenv",
-  "discord.py",
-  "cohere"
+  "cohere",
+  "py-cord==2.0.0b1",
 ]
 
 [project.optional-dependencies]
@@ -26,6 +25,7 @@ no_implicit_optional = true
 
 [tool.black]
 line-length = 88
+experimental-string-processing = true
 include = '\.pyi?$'
 exclude = '''
 /(

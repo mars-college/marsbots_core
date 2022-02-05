@@ -1,9 +1,10 @@
+import logging
 import re
 from datetime import datetime
+from typing import List
 from typing import Optional
 
 import discord
-from charset_normalizer import logging
 from discord.ext import commands
 
 from marsbots_core import constants
@@ -59,10 +60,52 @@ async def get_discord_messages(
     return raw_messages
 
 
-def remove_mentions(message_text: str) -> str:
+def replace_bot_mention(
+    message_text: str,
+    only_first: bool = True,
+    replacement_str: str = "",
+) -> str:
     """
     Removes all mentions from a message.
     :param message: The message to remove mentions from.
     :return: The message with all mentions removed.
     """
-    return re.sub(r"<@!\d+>", "", message_text)
+    if only_first:
+        return re.sub(r"<@!\d+>", replacement_str, message_text, 1)
+    else:
+        return re.sub(r"<@!\d+>", replacement_str, message_text)
+
+
+async def get_reply_chain(
+    ctx,
+    message: discord.Message,
+    depth: int,
+) -> List[discord.Message]:
+    messages = []
+    count = 0
+    while message and message.reference and count < depth:
+        message = await ctx.fetch_message(message.reference.message_id)
+        messages.append(message)
+        count += 1
+    messages.reverse()
+    return messages
+
+
+def replace_mentions_with_usernames(message_content: str, mentions) -> str:
+    """
+    Replaces all mentions with their usernames.
+    :param message_content: The message to replace mentions in.
+    :return: The message with all mentions replaced with their usernames.
+    """
+    for mention in mentions:
+        message_content = message_content.replace(f"<@!{mention.id}>", mention.name)
+    return message_content
+
+
+def in_channels(channel_ids: List[int]) -> commands.check:
+    async def predicate(ctx):
+        if ctx.channel.id in channel_ids:
+            return True
+        print("command not valid in channel")
+
+    return commands.check(predicate)

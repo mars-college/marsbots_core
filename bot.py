@@ -5,8 +5,7 @@ import logging
 import os
 
 import discord
-from discord import RequestsWebhookAdapter
-from discord import Webhook
+from discord import SyncWebhook
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -16,8 +15,9 @@ from marsbots_core.models import MarsBotSettings
 
 class MarsBot(commands.Bot):
     def __init__(self, specfile_path: str) -> None:
-        intents = discord.Intents.all()
+        intents = discord.Intents.default()
         self.settings = self.load_settings(specfile_path)
+        self.set_intents(intents)
         self.configure_logging()
         commands.Bot.__init__(
             self,
@@ -31,7 +31,16 @@ class MarsBot(commands.Bot):
         if "command_prefix" not in settings:
             # Hack to allow a bot without command prefix?
             settings["command_prefix"] = constants.UNLIKELY_PREFIX
+        if "intents" not in settings:
+            settings["intents"] = []
         return MarsBotSettings(**settings)
+
+    def set_intents(self, intents: discord.Intents) -> None:
+        intents.messages = True
+        if "presence" in self.settings.intents:
+            intents.presence = True
+        if "members" in self.settings.intents:
+            intents.members = True
 
     def configure_logging(self) -> None:
         logdir = constants.LOG_DIR / self.settings.name
@@ -61,10 +70,7 @@ class MarsBot(commands.Bot):
         webhook_url = os.getenv("CRASH_WEBHOOK_URL")
         if webhook_url:
             try:
-                webhook = Webhook.from_url(
-                    webhook_url,
-                    adapter=RequestsWebhookAdapter(),
-                )
+                webhook = SyncWebhook.from_url(webhook_url)
                 webhook.send(f"{self.settings.name} is down.")
             except Exception as e:
                 logging.error("Unable to post exit to webhook.")
@@ -82,10 +88,7 @@ def start(
     load_dotenv(dotenv_path)
 
     bot = MarsBot(specfile_path)
-    if cog_path:
-        bot.load_extension(cog_path)
-    else:
-        bot.load_extension("maincog")
+    bot.load_extension(cog_path)
     bot.run(os.getenv(bot.settings.token_env))
 
 
