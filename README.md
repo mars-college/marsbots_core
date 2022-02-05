@@ -29,6 +29,7 @@ The bot's JSON settings file should contain the following:
 `"name"`: The name of the bot
 `"token_env"`: The name of the environment variable which contains the discord bot token used to run the bot
 (Optional) `"command_prefix"`: This will be the prefix used for the bot to respond to commands.
+(Optional) `"intents"`: A list of special intents needed. Takes a list, with accepted values "presence" and "members"
 
 ### Cog File
 
