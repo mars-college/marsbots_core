@@ -1,6 +1,7 @@
 import logging
 import re
 from datetime import datetime
+from typing import List
 from typing import Optional
 
 import discord
@@ -79,7 +80,7 @@ async def get_reply_chain(
     ctx,
     message: discord.Message,
     depth: int,
-) -> list[discord.Message]:
+) -> List[discord.Message]:
     messages = []
     count = 0
     while message and message.reference and count < depth:
@@ -101,7 +102,7 @@ def replace_mentions_with_usernames(message_content: str, mentions) -> str:
     return message_content
 
 
-def in_channels(channel_ids: list[int]) -> commands.check:
+def in_channels(channel_ids: List[int]) -> commands.check:
     async def predicate(ctx):
         if ctx.channel.id in channel_ids:
             return True

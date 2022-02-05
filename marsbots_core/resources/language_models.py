@@ -2,6 +2,7 @@ from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
+from typing import List
 
 import cohere
 import numpy as np
@@ -63,7 +64,7 @@ class OpenAIGPT3LanguageModel(LanguageModel):
         completion_text = completion.choices[0].text
         return completion_text
 
-    def document_search(self, documents: list[str], query: str, **kwargs):
+    def document_search(self, documents: List[str], query: str, **kwargs):
         engine = kwargs.get("engine") or self.settings.engine
         search = openai.Engine(engine).search(documents=documents, query=query)
         return search

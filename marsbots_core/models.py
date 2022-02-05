@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass
@@ -6,7 +7,7 @@ class MarsBotSettings:
     name: str
     token_env: str
     command_prefix: str
-    intents: list[str]
+    intents: List[str]
 
 
 @dataclass
