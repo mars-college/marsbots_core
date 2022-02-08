@@ -109,3 +109,15 @@ def in_channels(channel_ids: List[int]) -> commands.check:
         print("command not valid in channel")
 
     return commands.check(predicate)
+
+
+async def wait_for_user_reply(bot: commands.Bot, sender_id: int) -> discord.Message:
+    """
+    Waits for a user to reply to a message.
+    :return: The message the user replied to.
+    """
+
+    def check(message: discord.Message) -> bool:
+        return sender_id == message.author.id
+
+    return await bot.wait_for("message", check=check)
