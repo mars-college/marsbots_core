@@ -13,6 +13,7 @@ dependencies = [
   "python-dotenv",
   "cohere",
   "py-cord==2.0.0b1",
+  "suntime"
 ]
 
 [project.optional-dependencies]
