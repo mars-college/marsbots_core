@@ -1,6 +1,8 @@
 import logging
 import re
 from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 from typing import List
 from typing import Optional
 
@@ -38,7 +40,7 @@ async def process_mention_as_command(
 async def get_discord_messages(
     channel: discord.TextChannel,
     limit: int,
-    time: Optional[datetime] = None,
+    after: Optional[timedelta] = None,
 ) -> list:
     """
     Gets the last x messages from a channel.
@@ -46,13 +48,13 @@ async def get_discord_messages(
     :param limit: The number of messages to get.
     :return: The last x messages from the channel.
     """
-    if time is None:
-        time = datetime.utcnow()
+    if after is not None:
+        time = datetime.now(timezone.utc) - after
 
     raw_messages = await channel.history(
         limit=limit,
         oldest_first=False,
-        before=time,
+        after=time,
     ).flatten()
 
     raw_messages.reverse()
@@ -109,3 +111,15 @@ def in_channels(channel_ids: List[int]) -> commands.check:
         print("command not valid in channel")
 
     return commands.check(predicate)
+
+
+async def wait_for_user_reply(bot: commands.Bot, sender_id: int) -> discord.Message:
+    """
+    Waits for a user to reply to a message.
+    :return: The message the user replied to.
+    """
+
+    def check(message: discord.Message) -> bool:
+        return sender_id == message.author.id
+
+    return await bot.wait_for("message", check=check)
