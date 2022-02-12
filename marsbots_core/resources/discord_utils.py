@@ -50,6 +50,8 @@ async def get_discord_messages(
     """
     if after is not None:
         time = datetime.now(timezone.utc) - after
+    else:
+        time = None
 
     raw_messages = await channel.history(
         limit=limit,
