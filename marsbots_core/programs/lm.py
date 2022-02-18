@@ -3,17 +3,15 @@ from functools import partial
 
 from charset_normalizer import logging
 
-from marsbots_core.resources.language_models import (
-    LanguageModel, 
-    OpenAIGPT3LanguageModel
-)
+from marsbots_core.resources.language_models import LanguageModel
+from marsbots_core.resources.language_models import OpenAIGPT3LanguageModel
 
 
 async def complete_text(
     language_model: LanguageModel,
     prompt: str,
     max_tokens: int,
-    use_content_filter: bool,
+    use_content_filter: bool = False,
     **kwargs: any,
 ) -> str:
     logging.info(f"Completing text with prompt: {prompt}")
@@ -30,11 +28,14 @@ async def complete_text(
             ),
         )
         num_tries += 1
-        if OpenAIGPT3LanguageModel.content_safe(completion_text) or not use_content_filter:
+        if (
+            OpenAIGPT3LanguageModel.content_safe(completion_text)
+            or not use_content_filter
+        ):
             response_safe = True
         else:
-            print(f'Completion flagged unsafe: {completion_text}')
-            logging.info(f'Completion flagged unsafe: {completion_text}')
+            print(f"Completion flagged unsafe: {completion_text}")
+            logging.info(f"Completion flagged unsafe: {completion_text}")
     if not response_safe:
         completion_text = "Sorry, try talking about something else."
     logging.info(f"Completed text: {completion_text}")
