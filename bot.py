@@ -38,7 +38,7 @@ class MarsBot(commands.Bot):
     def set_intents(self, intents: discord.Intents) -> None:
         intents.messages = True
         if "presence" in self.settings.intents:
-            intents.presence = True
+            intents.presences = True
         if "members" in self.settings.intents:
             intents.members = True
 
