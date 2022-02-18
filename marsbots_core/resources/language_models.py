@@ -65,17 +65,15 @@ class OpenAIGPT3LanguageModel(LanguageModel):
         return completion_text
 
     @staticmethod
-    def content_safe(
-        query: str
-    ) -> bool:
+    def content_safe(query: str) -> bool:
         # https://beta.openai.com/docs/engines/content-filter
         response = openai.Completion.create(
             engine="content-filter-alpha",
-            prompt = "<|endoftext|>"+query+"\n--\nLabel:",
+            prompt="<|endoftext|>" + query + "\n--\nLabel:",
             temperature=0,
             max_tokens=1,
             top_p=0,
-            logprobs=10
+            logprobs=10,
         )
         output_label = response["choices"][0]["text"]
         toxic_threshold = -0.355
@@ -95,7 +93,7 @@ class OpenAIGPT3LanguageModel(LanguageModel):
                     output_label = "1"
         if output_label not in ["0", "1", "2"]:
             output_label = "2"
-        return output_label != '2'
+        return output_label != "2"
 
     def document_search(self, documents: List[str], query: str, **kwargs):
         engine = kwargs.get("engine") or self.settings.engine
