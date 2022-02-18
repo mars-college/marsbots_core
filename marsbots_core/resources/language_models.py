@@ -64,6 +64,39 @@ class OpenAIGPT3LanguageModel(LanguageModel):
         completion_text = completion.choices[0].text
         return completion_text
 
+    @staticmethod
+    def content_safe(
+        query: str
+    ) -> bool:
+        # https://beta.openai.com/docs/engines/content-filter
+        response = openai.Completion.create(
+            engine="content-filter-alpha",
+            prompt = "<|endoftext|>"+query+"\n--\nLabel:",
+            temperature=0,
+            max_tokens=1,
+            top_p=0,
+            logprobs=10
+        )
+        output_label = response["choices"][0]["text"]
+        toxic_threshold = -0.355
+        if output_label == "2":
+            logprobs = response["choices"][0]["logprobs"]["top_logprobs"][0]
+            if logprobs["2"] < toxic_threshold:
+                logprob_0 = logprobs.get("0", None)
+                logprob_1 = logprobs.get("1", None)
+                if logprob_0 is not None and logprob_1 is not None:
+                    if logprob_0 >= logprob_1:
+                        output_label = "0"
+                    else:
+                        output_label = "1"
+                elif logprob_0 is not None:
+                    output_label = "0"
+                elif logprob_1 is not None:
+                    output_label = "1"
+        if output_label not in ["0", "1", "2"]:
+            output_label = "2"
+        return output_label != '2'
+
     def document_search(self, documents: List[str], query: str, **kwargs):
         engine = kwargs.get("engine") or self.settings.engine
         search = openai.Engine(engine).search(documents=documents, query=query)
@@ -83,7 +116,6 @@ class OpenAIGPT3LanguageModel(LanguageModel):
 
     def _get_embedding(self, text: str, engine: str):
         text = text.replace("\n", " ")
-
         return openai.Embedding.create(input=[text], engine=engine)["data"][0][
             "embedding"
         ]
