@@ -88,14 +88,20 @@ def start(
     load_dotenv(dotenv_path)
 
     bot = MarsBot(specfile_path)
-    bot.load_extension(cog_path)
+    for path in cog_path:
+        bot.load_extension(path)
     bot.run(os.getenv(bot.settings.token_env))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="MarsBot")
     parser.add_argument("specfile", help="specfile path")
-    parser.add_argument("--cog-path", help="Path to a custom cog file")
+    parser.add_argument(
+        "--cog-path",
+        help="Path to one or more cog files to load, using python module syntax",
+        nargs="+",
+        default=[],
+    )
     parser.add_argument("--dotenv-path", help="Path to a custom .env file")
     args = parser.parse_args()
     start(args.specfile, args.cog_path, args.dotenv_path)
