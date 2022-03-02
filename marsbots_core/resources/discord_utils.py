@@ -84,6 +84,15 @@ def replace_bot_mention(
         return re.sub(r"<@!\d+>", replacement_str, message_text)
 
 
+def remove_role_mentions(message_text: str) -> str:
+    """
+    Removes all role mentions from a message.
+    :param message_text: The message to remove role mentions from.
+    :return: The message with all role mentions removed.
+    """
+    return re.sub(r"<@&\d+>", "", message_text)
+
+
 async def get_reply_chain(
     ctx,
     message: discord.Message,
