@@ -22,6 +22,10 @@ def is_mentioned(message: discord.Message, user: discord.User) -> bool:
     return user.id in [m.id for m in message.mentions]
 
 
+def role_is_mentioned(message: discord.Message, role_name: str) -> bool:
+    return role_name in [r.name for r in message.role_mentions]
+
+
 async def process_mention_as_command(
     ctx: str,
     cog: commands.Cog,
