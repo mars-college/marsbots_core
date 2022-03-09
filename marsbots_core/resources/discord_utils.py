@@ -144,7 +144,7 @@ async def update_message(
     message: discord.Message,
     content: Optional[str] = None,
     image_paths: Optional[list[str]] = None,
-    clear_previous_images: bool = False,
+    clear_previous_images: bool = True,
 ) -> discord.Message:
     if content:
         await message.edit(content=content)
