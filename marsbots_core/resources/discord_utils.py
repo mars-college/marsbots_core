@@ -144,6 +144,7 @@ async def update_message(
     message: discord.Message,
     content: Optional[str] = None,
     image_paths: Optional[list[str]] = None,
+    clear_previous_images: bool = False,
 ) -> discord.Message:
     if content:
         await message.edit(content=content)
@@ -152,4 +153,7 @@ async def update_message(
             discord.File(filepath, filename=filepath.split("/")[-1])
             for filepath in image_paths
         ]
-        await message.edit(files=files, attachments=[])
+        if clear_previous_images:
+            await message.edit(files=files, attachments=[])
+        else:
+            await message.edit(files=files)
