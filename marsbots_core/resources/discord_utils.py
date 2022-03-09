@@ -143,16 +143,12 @@ async def wait_for_user_reply(bot: commands.Bot, sender_id: int) -> discord.Mess
 async def update_message(
     message: discord.Message,
     content: Optional[str] = None,
-    image_paths: Optional[list[str]] = None,
+    files: Optional[list[discord.File]] = None,
     clear_previous_images: bool = True,
 ) -> discord.Message:
     if content:
         await message.edit(content=content)
-    if image_paths:
-        files = [
-            discord.File(filepath, filename=filepath.split("/")[-1])
-            for filepath in image_paths
-        ]
+    if files:
         if clear_previous_images:
             await message.edit(files=files, attachments=[])
         else:
