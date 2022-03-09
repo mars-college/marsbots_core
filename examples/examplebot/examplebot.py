@@ -1,3 +1,6 @@
+import asyncio
+import os
+
 import discord
 from discord.commands import slash_command
 from discord.ext import commands
@@ -9,6 +12,7 @@ from marsbots_core.programs.ifttt import ifttt_post
 from marsbots_core.programs.lm import complete_text
 from marsbots_core.resources.discord_utils import get_discord_messages
 from marsbots_core.resources.discord_utils import in_channels
+from marsbots_core.resources.discord_utils import update_message
 from marsbots_core.resources.language_models import OpenAIGPT3LanguageModel
 
 
@@ -108,6 +112,18 @@ class ExampleCog(commands.Cog):
     @in_channels([config.TEST_CHANNEL_ID])
     async def test_in_channels(self, ctx):
         await ctx.send("In the test channel.")
+
+    @commands.command()
+    async def test_edit_message(self, ctx):
+        assets_path = os.path.join(os.path.dirname(__file__), "assets")
+        filepaths = [
+            os.path.join(assets_path, fname)
+            for fname in ["be-patient.png", "s-l1600.jpg", "uc2.png", "s-l1600 (1).jpg"]
+        ]
+        files = [discord.File(filepath) for filepath in filepaths[:2]]
+        message = await ctx.send("Hey", files=files)
+        await asyncio.sleep(3)
+        await update_message(message, content="Goodbye", image_paths=filepaths[2:])
 
 
 def setup(bot: commands.Bot) -> None:
