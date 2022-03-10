@@ -12,6 +12,7 @@ async def generation_loop(client, token, message, ctx, refresh_interval: int):
     last_image = None
     while not finished:
         result = client.fetch(token=token)
+        print(result)
         status = result["status"]["status"]
         if status == "complete":
             filepath = f"{task_id}-testimage.png"
@@ -28,20 +29,23 @@ async def generation_loop(client, token, message, ctx, refresh_interval: int):
                 await message.reply("Something went wrong :(")
         else:
             progress = result["status"].get("progress")
-            latest_image = result["config"]["data"].get("progress_image")
+            data = result["config"].get("data")
+            latest_image = data.get("progress_image") if data else None
 
             if progress:
-                update_progress(message, progress)
+                await update_progress(message, progress)
 
             if latest_image and latest_image != last_image:
-                update_image(message, latest_image)
+                await update_image(message, latest_image)
                 last_image = latest_image
 
             time.sleep(refresh_interval)
 
 
 async def update_progress(message, progress):
-    message_content = f"Generation is {progress*100}% complete"
+    if progress == '__none__':
+        return
+    message_content = f"Generation is {int(progress*100)}% complete"
     await update_message(message, content=message_content)
 
 
