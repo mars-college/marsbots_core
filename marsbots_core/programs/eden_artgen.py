@@ -1,4 +1,4 @@
-import time
+import asyncio
 import uuid
 
 import discord
@@ -12,17 +12,18 @@ async def generation_loop(
     og_message,
     bot_message,
     ctx,
+    output_dir,
     refresh_interval: int,
 ):
     task_id = str(uuid.uuid4())
     finished = False
     last_image = None
+    filepath = str(output_dir / f"{task_id}-testimage.png")
     while not finished:
         result = client.fetch(token=token)
         print(result)
         status = result["status"]["status"]
         if status == "complete":
-            filepath = f"{task_id}-testimage.png"
             output_img = result["output"]["creation"]
             output_img.save(filepath)
             await update_progress(bot_message, 1)
@@ -37,26 +38,46 @@ async def generation_loop(
                 await og_message.reply("Something went wrong :(")
         else:
             progress = result["status"].get("progress")
-            data = result["config"].get("data")
-            latest_image = data.get("progress_image") if data else None
+            output = result.get("output")
+            queue_position = result["status"].get("queue_position")
+            if output:
+                latest_image = output.get("intermediate_creation")
+            else:
+                latest_image = None
+
+            if queue_position:
+                await update_queue_position(bot_message, queue_position)
 
             if progress:
                 await update_progress(bot_message, progress)
 
             if latest_image and latest_image != last_image:
-                await update_image(bot_message, latest_image)
+                latest_image.save(filepath)
+                local_file = discord.File(filepath, filename=filepath)
+                await update_image(bot_message, local_file)
                 last_image = latest_image
 
-            time.sleep(refresh_interval)
+            await asyncio.sleep(refresh_interval)
+
+
+def appender(message, suffix):
+    return message.split('\n')[0] + '\n\n' + suffix
 
 
 async def update_progress(message, progress):
     if progress == "__none__":
-        return
+        progress = 0
     progress_num = min(int(progress * 100), 100)
-    message_content = f"Generation is {progress_num}% complete"
+    message_suffix = f"_Generation is **{progress_num}%** complete_"
+    message_content = appender(message.content, message_suffix)
+    await update_message(message, content=message_content)
+
+
+async def update_queue_position(message, position):
+    message_suffix = f"_Queue position: **{position}**_"
+    message_content = appender(message.content, message_suffix)
     await update_message(message, content=message_content)
 
 
 async def update_image(message, image):
-    await update_message(message, [image])
+    await update_message(message, files=[image])
