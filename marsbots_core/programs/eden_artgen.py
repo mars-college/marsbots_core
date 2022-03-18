@@ -6,7 +6,7 @@ import discord
 from marsbots_core.resources.discord_utils import update_message
 
 
-async def start_task(client, config):
+def start_task(client, config):
     result = client.run(config)
     token = result.get("token")
     return token
@@ -74,7 +74,7 @@ async def generation_loop(
 
 
 def appender(message, suffix):
-    return message.split('\n')[0] + '\n\n' + suffix
+    return message.split("\n")[0] + "\n\n" + suffix
 
 
 async def update_progress(message, progress):
