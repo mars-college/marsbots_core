@@ -6,16 +6,29 @@ import discord
 from marsbots_core.resources.discord_utils import update_message
 
 
+async def start_task(client, config):
+    result = client.run(config)
+    token = result.get("token")
+    return token
+
+
 async def generation_loop(
     client,
-    token,
-    og_message,
+    config,
+    user_message,
     bot_message,
     ctx,
     output_dir,
     refresh_interval: int,
 ):
     task_id = str(uuid.uuid4())
+    token = start_task(client, config)
+
+    if not token:
+        async with ctx.channel.typing():
+            await user_message.reply("Error starting generation.")
+        return
+
     finished = False
     last_image = None
     filepath = str(output_dir / f"{task_id}-testimage.png")
@@ -30,12 +43,12 @@ async def generation_loop(
             finished = True
             async with ctx.channel.typing():
                 local_file = discord.File(filepath, filename=filepath)
-                await og_message.reply("result", file=local_file)
+                await user_message.reply("result", file=local_file)
 
         elif status == "failed":
             finished = True
             async with ctx.channel.typing():
-                await og_message.reply("Something went wrong :(")
+                await user_message.reply("Something went wrong :(")
         else:
             progress = result["status"].get("progress")
             output = result.get("output")
