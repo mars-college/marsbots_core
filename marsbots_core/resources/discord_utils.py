@@ -143,7 +143,7 @@ async def wait_for_user_reply(bot: commands.Bot, sender_id: int) -> discord.Mess
 async def update_message(
     message: discord.Message,
     content: Optional[str] = None,
-    files: Optional[list[discord.File]] = None,
+    files: Optional[List[discord.File]] = None,
     clear_previous_images: bool = True,
 ) -> discord.Message:
     if content:
