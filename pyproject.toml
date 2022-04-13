@@ -11,10 +11,8 @@ dependencies = [
   "requests",
   "openai",
   "python-dotenv",
-  "cohere",
   "py-cord==2.0.0b1",
   "suntime",
-  "eden-python"
 ]
 
 [project.optional-dependencies]
