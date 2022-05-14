@@ -115,7 +115,7 @@ def replace_mentions_with_usernames(message_content: str, mentions) -> str:
     :return: The message with all mentions replaced with their usernames.
     """
     for mention in mentions:
-        message_content = message_content.replace(f"<@!{mention.id}>", mention.name)
+        message_content = message_content.replace(f"<@{mention.id}>", mention.name)
     return message_content
 
 
@@ -153,3 +153,9 @@ async def update_message(
             await message.edit(files=files, attachments=[])
         else:
             await message.edit(files=files)
+
+
+def filter_application_command_messages(
+    messages: List[discord.Message],
+) -> List[discord.Message]:
+    return [m for m in messages if m.type != discord.MessageType.application_command]
