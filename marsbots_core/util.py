@@ -21,3 +21,24 @@ def randomly(prob):
         return wrapper
 
     return decorator
+
+
+def pythonify_json(json_data):
+
+    correctedDict = {}
+
+    for key, value in json_data.items():
+        if isinstance(value, list):
+            value = [
+                pythonify_json(item) if isinstance(item, dict) else item
+                for item in value
+            ]
+        elif isinstance(value, dict):
+            value = pythonify_json(value)
+        try:
+            key = int(key)
+        except Exception:
+            pass
+        correctedDict[key] = value
+
+    return correctedDict

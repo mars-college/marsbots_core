@@ -10,6 +10,7 @@ import discord
 from discord.ext import commands
 
 from marsbots_core import constants
+from marsbots_core.exceptions import ChannelNotFoundError
 
 
 def is_mentioned(message: discord.Message, user: discord.User) -> bool:
@@ -159,3 +160,13 @@ def filter_application_command_messages(
     messages: List[discord.Message],
 ) -> List[discord.Message]:
     return [m for m in messages if m.type != discord.MessageType.application_command]
+
+
+def get_channel_id_by_channel_name(channel_name: str, ctx) -> int:
+    try:
+        channel = next(
+            filter(lambda x: x.name == channel_name, ctx.guild.text_channels),
+        )
+        return channel.id
+    except StopIteration:
+        raise ChannelNotFoundError("No text channel found matching the given name.")
