@@ -170,3 +170,10 @@ def get_channel_id_by_channel_name(channel_name: str, ctx) -> int:
         return channel.id
     except StopIteration:
         raise ChannelNotFoundError("No text channel found matching the given name.")
+
+
+def get_nick(member):
+    if hasattr(member, "nick") and member.nick is not None:
+        return member.nick
+    else:
+        return member.name

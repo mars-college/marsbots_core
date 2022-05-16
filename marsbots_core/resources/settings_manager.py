@@ -32,6 +32,8 @@ class SettingsManager(ABC):
     def initialize_guild(self, guild_id):
         self.settings[guild_id] = {}
         guild_settings = self.settings[guild_id]
+        print("###########")
+        print(self.defaults)
         for k, v in self.defaults.__dict__.items():
             guild_settings[k] = {}
             guild_settings[k]["default"] = v

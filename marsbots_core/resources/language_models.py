@@ -24,7 +24,7 @@ class LanguageModel(ABC):
 
 @dataclass
 class OpenAIGPT3LanguageModelSettings:
-    engine: str = "davinci"
+    engine: str = "text-davinci-002"
     temperature: float = 1.0
     top_p: float = 1.0
     frequency_penalty: float = 0.0
