@@ -220,7 +220,6 @@ dmypy.json
 # Icon must end with two \r
 Icon
 
-
 # Thumbnails
 ._*
 
@@ -243,6 +242,7 @@ Temporary Items
 # Program
 
 bots/
+pm2.config.js
 
 # User
 secrets/

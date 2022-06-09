@@ -8,6 +8,7 @@ authors = [{ name = "Jonathan Miller", email = "jon@jmill.dev" }]
 readme = "README.md"
 dynamic = ["version", "description"]
 dependencies = [
+  "cohere",
   "requests",
   "openai",
   "python-dotenv",

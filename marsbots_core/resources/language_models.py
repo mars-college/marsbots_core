@@ -95,9 +95,19 @@ class OpenAIGPT3LanguageModel(LanguageModel):
             output_label = "2"
         return output_label != "2"
 
-    def document_search(self, documents: List[str], query: str, **kwargs):
+    def document_search(
+        self,
+        query: str,
+        documents: List[str] = None,
+        file=None,
+        **kwargs,
+    ):
         engine = kwargs.get("engine") or self.settings.engine
-        search = openai.Engine(engine).search(documents=documents, query=query)
+        search = openai.Engine(engine).search(
+            documents=documents,
+            query=query,
+            file=file,
+        )
         return search
 
     def document_similarity(self, document: str, query: str, **kwargs):
@@ -117,6 +127,9 @@ class OpenAIGPT3LanguageModel(LanguageModel):
         return openai.Embedding.create(input=[text], engine=engine)["data"][0][
             "embedding"
         ]
+
+    def upload_doc(self, document_path: str, purpose: str = "search"):
+        openai.File.create(file=document_path, purpose=purpose)
 
 
 @dataclass
