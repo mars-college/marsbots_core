@@ -41,9 +41,8 @@ async def generation_loop(
             output_img.save(filepath)
             await update_progress(bot_message, 1)
             finished = True
-            async with ctx.channel.typing():
-                local_file = discord.File(filepath, filename=filepath)
-                await user_message.reply("result", file=local_file)
+            local_file = discord.File(filepath, filename=filepath)
+            return local_file
 
         elif status == "failed":
             finished = True
