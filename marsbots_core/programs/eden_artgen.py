@@ -1,19 +1,18 @@
 import asyncio
 import uuid
+import requests
+import json
+import io
+import aiohttp
 
 import discord
 
 from marsbots_core.resources.discord_utils import update_message
 
 
-def start_task(client, config):
-    result = client.run(config)
-    token = result.get("token")
-    return token
-
-
 async def generation_loop(
-    client,
+    gateway_url,
+    minio_url,
     config,
     user_message,
     bot_message,
@@ -21,55 +20,52 @@ async def generation_loop(
     output_dir,
     refresh_interval: int,
 ):
-    task_id = str(uuid.uuid4())
-    token = start_task(client, config)
+    result = requests.post(gateway_url+'/request_creation', json=config)
 
-    if not token:
-        async with ctx.channel.typing():
-            await user_message.reply("Error starting generation.")
+    if not await check_server_result_ok(result, bot_message):
         return
 
-    finished = False
-    last_image = None
-    filepath = str(output_dir / f"{task_id}-testimage.png")
-    while not finished:
-        result = client.fetch(token=token)
-        print(result)
-        status = result["status"]["status"]
-        if status == "complete":
-            output_img = result["output"]["creation"]
-            output_img.save(filepath)
-            await update_progress(bot_message, 1)
-            finished = True
-            local_file = discord.File(filepath, filename=filepath)
-            return local_file
+    result = json.loads(result.content)
+    task_id = result['task_id']
+    current_sha = None
+    await update_progress(bot_message, 0)
 
-        elif status == "failed":
-            finished = True
-            async with ctx.channel.typing():
-                await user_message.reply("Something went wrong :(")
-        else:
-            progress = result["status"].get("progress")
-            output = result.get("output")
-            queue_position = result["status"].get("queue_position")
-            if output:
-                latest_image = output.get("intermediate_creation")
-            else:
-                latest_image = None
+    while True:
+        result = requests.post(gateway_url+'/get_creations', json={"task_id": task_id})
 
-            if queue_position:
-                await update_queue_position(bot_message, queue_position)
+        if not await check_server_result_ok(result, bot_message):
+            return
 
-            if progress:
-                await update_progress(bot_message, progress)
+        result = json.loads(result.content)
 
-            if latest_image and latest_image != last_image:
-                latest_image.save(filepath)
-                local_file = discord.File(filepath, filename=filepath)
-                await update_image(bot_message, local_file)
-                last_image = latest_image
+        if not result:
+            message_suffix = f"_Server error: task ID not found_"
+            message_content = appender(bot_message.content, message_suffix)
+            return await update_message(bot_message, content=message_content)
 
-            await asyncio.sleep(refresh_interval)
+        result = result[0]
+        status = result['status']
+        progress = -1 if status == 'pending' else result['status_code']
+        await update_progress(bot_message, progress)
+
+        if 'intermediate_sha' in result:
+            last_sha = result['intermediate_sha'][-1]
+            if last_sha != current_sha:
+                current_sha = last_sha
+                sha_url = f'{minio_url}/{current_sha}'
+                filename = f'{current_sha}.png'
+                discord_file = await get_discord_file_from_url(sha_url, filename)
+                await update_image(bot_message, discord_file)
+
+        if status == 'failed':
+            message_suffix = f"_Server error: Eden task failed_"
+            message_content = appender(bot_message.content, message_suffix)
+            return await update_message(bot_message, content=message_content)
+
+        if status not in ['pending', 'running']:
+            break
+
+        await asyncio.sleep(refresh_interval)
 
 
 def appender(message, suffix):
@@ -79,8 +75,8 @@ def appender(message, suffix):
 async def update_progress(message, progress):
     if progress == "__none__":
         progress = 0
-    progress_num = min(int(progress * 100), 100)
-    message_suffix = f"_Generation is **{progress_num}%** complete_"
+    progress_str = 'pending' if progress == -1 else f'**{progress}%** complete'
+    message_suffix = '' if progress == 100 else f"_Creation is {progress_str}_"
     message_content = appender(message.content, message_suffix)
     await update_message(message, content=message_content)
 
@@ -93,3 +89,22 @@ async def update_queue_position(message, position):
 
 async def update_image(message, image):
     await update_message(message, files=[image])
+
+
+async def get_discord_file_from_url(url, filename):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status != 200:
+                return None
+            data = io.BytesIO(await resp.read())
+            discord_file = discord.File(data, filename)
+            return discord_file
+
+
+async def check_server_result_ok(result, bot_message):
+    if result.status_code != 200:
+        error_message = result.content.decode("utf-8")
+        message_suffix = f"_Server error: {error_message}_"
+        message_content = appender(bot_message.content, message_suffix)
+        await update_message(bot_message, content=message_content)
+    return result.status_code == 200
