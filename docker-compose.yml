@@ -2,5 +2,9 @@ version: "3.9"
 services:
   marsbots:
     build: .
+    environment:
+      - PM2_CONFIG_PATH=${PM2_CONFIG_PATH}
     volumes:
-      - .:/bots
+      - type: bind
+        source: ./bots
+        target: /bots/bots
