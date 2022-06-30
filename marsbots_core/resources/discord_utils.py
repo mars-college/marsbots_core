@@ -80,9 +80,9 @@ def replace_bot_mention(
     :return: The message with all mentions removed.
     """
     if only_first:
-        return re.sub(r"<@!\d+>", replacement_str, message_text, 1)
+        return re.sub(r"<@\d+>", replacement_str, message_text, 1)
     else:
-        return re.sub(r"<@!\d+>", replacement_str, message_text)
+        return re.sub(r"<@\d+>", replacement_str, message_text)
 
 
 def remove_role_mentions(message_text: str) -> str:

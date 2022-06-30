@@ -56,10 +56,12 @@ class CharacterCog(commands.Cog):
         if reply_chain:
             prompt += f"{reply_chain}\n"
 
+        prompt += "\n"
+
         prompt += "\n".join(
             [
                 last_message_text,
-                self.bot_name,
+                f"<{self.bot_name}>",
             ],
         )
 
