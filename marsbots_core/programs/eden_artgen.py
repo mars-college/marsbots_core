@@ -31,7 +31,7 @@ async def generation_loop(
     await update_progress(bot_message, 0)
 
     while True:
-        result = requests.post(gateway_url+'/get_creations', json={"task_id": task_id})
+        result = requests.post(gateway_url+'/get_creations', json={"task": task_id})
 
         if not await check_server_result_ok(result, bot_message):
             return
