@@ -3,7 +3,7 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "marsbots_core"
+name = "marsbots"
 authors = [{ name = "Jonathan Miller", email = "jon@jmill.dev" }]
 readme = "README.md"
 dynamic = ["version", "description"]
@@ -13,7 +13,6 @@ dependencies = [
   "openai",
   "python-dotenv",
   "py-cord==2.0.0b1",
-  "suntime",
 ]
 
 [project.optional-dependencies]

@@ -9,8 +9,8 @@ import numpy as np
 import openai
 import requests
 
-from marsbots_core import config
-from marsbots_core.util import cosine_similarity
+from marsbots import config
+from marsbots.util import cosine_similarity
 
 
 class LanguageModel(ABC):

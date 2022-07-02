@@ -9,8 +9,8 @@ from typing import Optional
 import discord
 from discord.ext import commands
 
-from marsbots_core import constants
-from marsbots_core.exceptions import ChannelNotFoundError
+from marsbots import constants
+from marsbots.exceptions import ChannelNotFoundError
 
 
 def is_mentioned(message: discord.Message, user: discord.User) -> bool:

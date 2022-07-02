@@ -7,17 +7,17 @@ import discord
 from discord.commands import slash_command
 from discord.ext import commands
 
-from marsbots_core import config
-from marsbots_core.models import ChatMessage
-from marsbots_core.programs.ifttt import ifttt_get
-from marsbots_core.programs.ifttt import ifttt_post
-from marsbots_core.programs.lm import complete_text
-from marsbots_core.resources.discord_utils import get_discord_messages
-from marsbots_core.resources.discord_utils import in_channels
-from marsbots_core.resources.discord_utils import update_message
-from marsbots_core.resources.discord_utils import wait_for_user_reply
-from marsbots_core.resources.language_models import OpenAIGPT3LanguageModel
-from marsbots_core.resources.settings_manager import LocalSettingsManager
+from marsbots import config
+from marsbots.models import ChatMessage
+from marsbots.programs.ifttt import ifttt_get
+from marsbots.programs.ifttt import ifttt_post
+from marsbots.programs.lm import complete_text
+from marsbots.resources.discord_utils import get_discord_messages
+from marsbots.resources.discord_utils import in_channels
+from marsbots.resources.discord_utils import update_message
+from marsbots.resources.discord_utils import wait_for_user_reply
+from marsbots.resources.language_models import OpenAIGPT3LanguageModel
+from marsbots.resources.settings_manager import LocalSettingsManager
 
 
 class ButtonView(discord.ui.View):

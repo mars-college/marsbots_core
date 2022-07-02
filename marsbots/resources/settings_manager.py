@@ -4,7 +4,7 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Union
 
-from marsbots_core.util import pythonify_json
+from marsbots.util import pythonify_json
 
 
 class SettingsManager(ABC):

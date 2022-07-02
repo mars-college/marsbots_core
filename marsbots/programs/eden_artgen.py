@@ -1,13 +1,12 @@
 import asyncio
-import uuid
-import requests
-import json
 import io
+import json
+
 import aiohttp
-
 import discord
+import requests
 
-from marsbots_core.resources.discord_utils import update_message
+from marsbots.resources.discord_utils import update_message
 
 
 async def generation_loop(
@@ -20,18 +19,21 @@ async def generation_loop(
     output_dir,
     refresh_interval: int,
 ):
-    result = requests.post(gateway_url+'/request_creation', json=config)
+    result = requests.post(gateway_url + "/request_creation", json=config)
 
     if not await check_server_result_ok(result, bot_message):
         return
 
     result = json.loads(result.content)
-    task_id = result['task_id']
+    task_id = result["task_id"]
     current_sha = None
     await update_progress(bot_message, 0)
 
     while True:
-        result = requests.post(gateway_url+'/get_creations', json={"task_id": task_id})
+        result = requests.post(
+            gateway_url + "/get_creations",
+            json={"task_id": task_id},
+        )
 
         if not await check_server_result_ok(result, bot_message):
             return
@@ -39,30 +41,30 @@ async def generation_loop(
         result = json.loads(result.content)
 
         if not result:
-            message_suffix = f"_Server error: task ID not found_"
+            message_suffix = "_Server error: task ID not found_"
             message_content = appender(bot_message.content, message_suffix)
             return await update_message(bot_message, content=message_content)
 
         result = result[0]
-        status = result['status']
-        progress = -1 if status == 'pending' else result['status_code']
+        status = result["status"]
+        progress = -1 if status == "pending" else result["status_code"]
         await update_progress(bot_message, progress)
 
-        if 'intermediate_sha' in result:
-            last_sha = result['intermediate_sha'][-1]
+        if "intermediate_sha" in result:
+            last_sha = result["intermediate_sha"][-1]
             if last_sha != current_sha:
                 current_sha = last_sha
-                sha_url = f'{minio_url}/{current_sha}'
-                filename = f'{current_sha}.png'
+                sha_url = f"{minio_url}/{current_sha}"
+                filename = f"{current_sha}.png"
                 discord_file = await get_discord_file_from_url(sha_url, filename)
                 await update_image(bot_message, discord_file)
 
-        if status == 'failed':
-            message_suffix = f"_Server error: Eden task failed_"
+        if status == "failed":
+            message_suffix = "_Server error: Eden task failed_"
             message_content = appender(bot_message.content, message_suffix)
             return await update_message(bot_message, content=message_content)
 
-        if status not in ['pending', 'running']:
+        if status not in ["pending", "running"]:
             break
 
         await asyncio.sleep(refresh_interval)
@@ -75,8 +77,8 @@ def appender(message, suffix):
 async def update_progress(message, progress):
     if progress == "__none__":
         progress = 0
-    progress_str = 'pending' if progress == -1 else f'**{progress}%** complete'
-    message_suffix = '' if progress == 100 else f"_Creation is {progress_str}_"
+    progress_str = "pending" if progress == -1 else f"**{progress}%** complete"
+    message_suffix = "" if progress == 100 else f"_Creation is {progress_str}_"
     message_content = appender(message.content, message_suffix)
     await update_message(message, content=message_content)
 

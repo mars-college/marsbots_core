@@ -3,8 +3,8 @@ from functools import partial
 
 from charset_normalizer import logging
 
-from marsbots_core.resources.language_models import LanguageModel
-from marsbots_core.resources.language_models import OpenAIGPT3LanguageModel
+from marsbots.resources.language_models import LanguageModel
+from marsbots.resources.language_models import OpenAIGPT3LanguageModel
 
 
 async def complete_text(
