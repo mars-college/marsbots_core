@@ -15,6 +15,9 @@ dependencies = [
   "py-cord==2.0.0b1",
 ]
 
+[tool.flit.sdist]
+include = ["marsbots/"]
+
 [project.optional-dependencies]
 dev = ["black", "pytest", "mypy", "pre-commit", "flake8"]
 

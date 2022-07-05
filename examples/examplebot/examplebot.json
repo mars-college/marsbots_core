@@ -1,0 +1,5 @@
+{
+  "name": "Example Bot",
+  "token_env": "DISCORD_TOKEN_TEST",
+  "command_prefix": "!"
+}
