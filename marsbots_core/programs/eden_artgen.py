@@ -12,7 +12,7 @@ from marsbots_core.resources.discord_utils import update_message
 
 @dataclass
 class SourceSettings:
-    origin: 'discord', 
+    origin: str
     author: int
     author_name: str
     guild: int
@@ -45,11 +45,6 @@ class EdenDiffusionSettings:
 class EdenOracleSettings:
     text_input: str
 
-generator_names = {
-    EdenClipXSettings: 'eden-clipx',
-    EdenDiffusionSettings: 'eden-diffusion'
-    EdenOracleSettings: 'eden-oracle'
-}
 
 
 async def generation_loop(
@@ -63,8 +58,14 @@ async def generation_loop(
     refresh_interval: int,
 ):
 
+    generator_names = {
+        EdenClipXSettings: 'eden-clipx',
+        EdenDiffusionSettings: 'eden-diffusion',
+        EdenOracleSettings: 'eden-oracle'
+    }
+
     generator_name = generator_names[type(config)]
-    data = {'source': source, 'generator_name': generator_name, 'config': config}
+    data = {'source': source.__dict__, 'config': config.__dict__}
     result = requests.post(gateway_url+'/request_creation', json=data)
 
     if not await check_server_result_ok(result, bot_message):
