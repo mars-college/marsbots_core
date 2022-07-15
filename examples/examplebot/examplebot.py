@@ -8,14 +8,14 @@ from discord.commands import slash_command
 from discord.ext import commands
 
 from marsbots import config
+from marsbots.discord_utils import get_discord_messages
+from marsbots.discord_utils import in_channels
+from marsbots.discord_utils import update_message
+from marsbots.discord_utils import wait_for_user_reply
+from marsbots.language_models import complete_text
+from marsbots.language_models import OpenAIGPT3LanguageModel
 from marsbots.models import ChatMessage
-from marsbots.programs.lm import complete_text
-from marsbots.resources.discord_utils import get_discord_messages
-from marsbots.resources.discord_utils import in_channels
-from marsbots.resources.discord_utils import update_message
-from marsbots.resources.discord_utils import wait_for_user_reply
-from marsbots.resources.language_models import OpenAIGPT3LanguageModel
-from marsbots.resources.settings_manager import LocalSettingsManager
+from marsbots.settings_manager import LocalSettingsManager
 
 
 class ButtonView(discord.ui.View):

@@ -1,6 +1,8 @@
+import asyncio
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
+from functools import partial
 from typing import Any
 from typing import List
 
@@ -252,3 +254,35 @@ class GooseAILanguageModel(LanguageModel):
         )
         completion_text = completion.choices[0].text
         return completion_text
+
+
+async def complete_text(
+    language_model: LanguageModel,
+    prompt: str,
+    max_tokens: int,
+    use_content_filter: bool = False,
+    **kwargs: any,
+) -> str:
+    loop = asyncio.get_running_loop()
+    response_safe, max_tries, num_tries = False, 3, 0
+    while num_tries < max_tries and not response_safe:
+        completion_text = await loop.run_in_executor(
+            None,
+            partial(
+                language_model.completion_handler,
+                prompt=prompt,
+                max_tokens=int(max_tokens),
+                **kwargs,
+            ),
+        )
+        num_tries += 1
+        if (
+            OpenAIGPT3LanguageModel.content_safe(completion_text)
+            or not use_content_filter
+        ):
+            response_safe = True
+        else:
+            print(f"Completion flagged unsafe: {completion_text}")
+    if not response_safe:
+        completion_text = "Sorry, try talking about something else."
+    return completion_text

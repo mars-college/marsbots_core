@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 from marsbots import config
-from marsbots.resources.language_models import OpenAIGPT3LanguageModel
+from marsbots.language_models import OpenAIGPT3LanguageModel
 
 
 class ExampleCog2(commands.Cog):

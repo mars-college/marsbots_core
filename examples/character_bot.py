@@ -3,15 +3,15 @@ from discord.ext import commands
 
 from . import prompts
 from marsbots import config
+from marsbots.discord_utils import get_discord_messages
+from marsbots.discord_utils import get_reply_chain
+from marsbots.discord_utils import is_mentioned
+from marsbots.discord_utils import remove_role_mentions
+from marsbots.discord_utils import replace_bot_mention
+from marsbots.discord_utils import replace_mentions_with_usernames
+from marsbots.language_models import complete_text
+from marsbots.language_models import OpenAIGPT3LanguageModel
 from marsbots.models import ChatMessage
-from marsbots.programs.lm import complete_text
-from marsbots.resources.discord_utils import get_discord_messages
-from marsbots.resources.discord_utils import get_reply_chain
-from marsbots.resources.discord_utils import is_mentioned
-from marsbots.resources.discord_utils import remove_role_mentions
-from marsbots.resources.discord_utils import replace_bot_mention
-from marsbots.resources.discord_utils import replace_mentions_with_usernames
-from marsbots.resources.language_models import OpenAIGPT3LanguageModel
 
 
 class CharacterCog(commands.Cog):
