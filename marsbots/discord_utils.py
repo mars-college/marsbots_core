@@ -109,14 +109,25 @@ async def get_reply_chain(
     return messages
 
 
-def replace_mentions_with_usernames(message_content: str, mentions) -> str:
+def replace_mentions_with_usernames(
+    message_content: str,
+    mentions,
+    prefix: str = "",
+    suffix: str = "",
+) -> str:
     """
     Replaces all mentions with their usernames.
     :param message_content: The message to replace mentions in.
     :return: The message with all mentions replaced with their usernames.
     """
     for mention in mentions:
-        message_content = message_content.replace(f"<@{mention.id}>", mention.name)
+        print(mention)
+        print(type(mention))
+        print(get_nick(mention))
+        message_content = message_content.replace(
+            f"<@{mention.id}>",
+            f"{prefix}{mention.display_name}{suffix}",
+        )
     return message_content
 
 

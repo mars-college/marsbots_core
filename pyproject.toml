@@ -12,7 +12,7 @@ dependencies = [
   "requests",
   "openai",
   "python-dotenv",
-  "py-cord==2.0.0b1",
+  "py-cord==2.0.0",
 ]
 
 [tool.flit.sdist]

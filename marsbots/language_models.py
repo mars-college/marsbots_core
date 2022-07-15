@@ -42,6 +42,7 @@ class OpenAIGPT3LanguageModel(LanguageModel):
     ) -> None:
         self.settings = OpenAIGPT3LanguageModelSettings(**kwargs)
         openai.api_key = api_key
+        openai.log = "debug"
         super().__init__(model_name)
 
     def completion_handler(
