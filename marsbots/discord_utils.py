@@ -121,9 +121,6 @@ def replace_mentions_with_usernames(
     :return: The message with all mentions replaced with their usernames.
     """
     for mention in mentions:
-        print(mention)
-        print(type(mention))
-        print(get_nick(mention))
         message_content = message_content.replace(
             f"<@{mention.id}>",
             f"{prefix}{mention.display_name}{suffix}",

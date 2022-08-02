@@ -1,2 +1,2 @@
-class ChannelNotFoundError(Exception):
+class ChannelNotFoundError:
     pass

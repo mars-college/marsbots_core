@@ -3,11 +3,27 @@ from typing import List
 
 
 @dataclass
-class MarsBotSettings:
+class MarsBotMetadata:
     name: str
     token_env: str
     command_prefix: str
     intents: List[str]
+
+
+@dataclass
+class MarsBotCommand:
+    name: str
+    is_listener: bool
+    allowed_guilds: List[int]
+    allowed_channels: List[int]
+    allowed_in_dm: bool
+    allowed_users: List[int]
+
+
+@dataclass
+class MarsBot:
+    metadata: MarsBotMetadata
+    commands: List[MarsBotCommand]
 
 
 @dataclass
