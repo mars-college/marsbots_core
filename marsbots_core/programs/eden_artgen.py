@@ -1,9 +1,11 @@
+import os
 import asyncio
 import uuid
 import requests
 import json
 import io
 import aiohttp
+from moviepy.editor import VideoFileClip
 from typing import List
 from dataclasses import dataclass, field
 import discord
@@ -37,15 +39,21 @@ class EdenClipXSettings:
     clip_model_options: List = field(default_factory=lambda: [["ViT-B/32", "ViT-B/16", "RN50"]])
     num_iterations: tuple[int] = (100, 200, 300)
 
+
 @dataclass
 class StableDiffusionSettings:
-    text_input: str
     width: int
     height: int
-    ddim_steps: int
-    plms: bool
-    C: int
-    f: int
+    text_input: str
+    mode: str = "generate"
+    seed: int = 42 
+    fixed_code: bool = False
+    interpolation_texts: List = field(default_factory=lambda: [])
+    n_interpolate: int = 10
+    ddim_steps: int = 50
+    plms: bool = False
+    C: int = 4
+    f: int = 8    
 
 @dataclass
 class OracleSettings:
@@ -62,6 +70,7 @@ async def generation_loop(
     bot_message,
     ctx,
     refresh_interval: int,
+    gif: bool = False
 ):
 
     generator_names = {
@@ -111,16 +120,53 @@ async def generation_loop(
 
         # update message image
         if status == 'complete' or 'intermediate_sha' in result:
+            
+            video_clip = False
             if status == 'complete':
-                last_sha = result['sha']
+                if 'video_sha' in result:
+                    last_sha = result['video_sha']
+                    video_clip = True
+                else:
+                    last_sha = result['sha']
             else:
                 last_sha = result['intermediate_sha'][-1]
+            
             if last_sha != current_sha:
                 current_sha = last_sha
-                sha_url = f'{minio_url}/{current_sha}'
-                filename = f'{current_sha}.png'
-                discord_file = await get_discord_file_from_url(sha_url, filename)
-                await update_image(bot_message, discord_file)
+                
+                if video_clip:
+                    await append_message(bot_message, "_Creation is finished. Making GIF..._")
+
+                    sha_url = f'{minio_url}/{current_sha}.mp4'
+                    sha_mp4 = sha_url.split('/')[-1]
+                    
+                    if gif:
+                        sha_gif = sha_mp4.replace('.mp4', '.gif')
+                        res = requests.get(sha_url)
+                        with open(sha_mp4, "wb") as f:
+                            f.write(res.content)
+                        VideoFileClip(sha_mp4).write_gif(sha_gif)
+                        discord_file = discord.File(sha_gif, sha_gif)                        
+                        if os.path.isfile(sha_mp4):
+                            os.remove(sha_mp4)
+                        if os.path.isfile(sha_gif):
+                            os.remove(sha_gif)
+                    
+                    else:
+                        discord_file = await get_discord_file_from_url(sha_url, sha_mp4)
+                    
+                    await append_message(bot_message, "")
+                    
+                    try:
+                        await update_image(bot_message, discord_file)
+                    except:
+                        await append_message(bot_message, "GIF attachment failed... :(")
+
+                else:
+                    sha_url = f'{minio_url}/{current_sha}'
+                    filename = f'{current_sha}.png'
+                    discord_file = await get_discord_file_from_url(sha_url, filename)
+                    await update_image(bot_message, discord_file)
 
         if status not in ['queued', 'pending', 'running']:
             break

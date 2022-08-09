@@ -11,6 +11,7 @@ dependencies = [
   "cohere",
   "requests",
   "openai",
+  "moviepy",
   "python-dotenv",
   "py-cord==2.0.0b1",
   "suntime",
