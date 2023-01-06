@@ -8,11 +8,11 @@ authors = [{ name = "Jonathan Miller", email = "jon@jmill.dev" }]
 readme = "README.md"
 dynamic = ["version", "description"]
 dependencies = [
-  "cohere",
   "requests",
-  "openai",
+  "manifest-ml",
+  "numpy",
   "python-dotenv",
-  "py-cord==2.0.0",
+  "py-cord",
 ]
 
 [tool.flit.sdist]
